@@ -73,10 +73,10 @@ const OnBoardingForm = ({ industries }) => {
   const watchIndustry = watch("industry");
 
   return (
-    <div>
-      <Card className="flex items-center justify-center bg-background">
-        <CardHeader className="w-full max-w-lg mt-10 mx-2">
-          <CardTitle className="gradient-title text-4xl">
+    <div className="min-h-screen pt-20 pb-8 px-4 flex items-center justify-center bg-background">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="gradient-title text-3xl">
             Complete Profile
           </CardTitle>
           <CardDescription>
@@ -87,7 +87,7 @@ const OnBoardingForm = ({ industries }) => {
         <CardContent>
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-2">
-              <Label htmlFor="industry" >Industry</Label>
+              <Label htmlFor="industry">Industry</Label>
               <Select
                 onValueChange={(value) => {
                   setValue("industry", value);
@@ -110,7 +110,7 @@ const OnBoardingForm = ({ industries }) => {
               </Select>
 
               {errors.industry && (
-                <p className="text-sm bg-red-500">{errors.industry.message}</p>
+                <p className="text-sm text-red-500">{errors.industry.message}</p>
               )}
             </div>
 
@@ -135,7 +135,7 @@ const OnBoardingForm = ({ industries }) => {
                 </Select>
 
                 {errors.subIndustry && (
-                  <p className="text-sm bg-red-500">
+                  <p className="text-sm text-red-500">
                     {errors.subIndustry.message}
                   </p>
                 )}
@@ -154,7 +154,7 @@ const OnBoardingForm = ({ industries }) => {
               />
 
               {errors.experience && (
-                <p className="text-sm bg-red-500">
+                <p className="text-sm text-red-500">
                   {errors.experience.message}
                 </p>
               )}
@@ -168,7 +168,7 @@ const OnBoardingForm = ({ industries }) => {
                 {...register("skills")}
               />
               {errors.skills && (
-                <p className="text-sm bg-red-500">{errors.skills.message}</p>
+                <p className="text-sm text-red-500">{errors.skills.message}</p>
               )}
             </div>
 
@@ -182,7 +182,7 @@ const OnBoardingForm = ({ industries }) => {
               />
 
               {errors.bio && (
-                <p className="text-sm bg-red-500">{errors.bio.message}</p>
+                <p className="text-sm text-red-500">{errors.bio.message}</p>
               )}
             </div>
 

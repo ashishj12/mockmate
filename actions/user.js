@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { generateAIInsights } from "./dashboard";
 
 export async function updateUser(data) {
   const { userId } = await auth();
@@ -16,50 +17,41 @@ export async function updateUser(data) {
   if (!user) throw new Error("user not found");
 
   try {
-    const result = await db.$transaction(
-      async (tx) => {
-        // check if the industry exists or not
-        let industryInsight = await tx.industryInsight.findUnique({
-          where: {
-            industry: data.industry,
-          },
-        });
+    const result = await db.$transaction(async (tx) => {
+      // check if the industry exists or not
+      let industryInsight = await tx.industryInsight.findUnique({
+        where: {
+          industry: data.industry,
+        },
+      });
 
-        // if not then we create default values
-        if (!industryInsight) {
-          industryInsight = await tx.industryInsight.create({
-            data: {
-              industry: data.industry,
-              salaryRanges: [],
-              growthRate: 0,
-              demandLevel: "MEDIUM",
-              topSkills: [],
-              marketOutlook: "NEUTRAL", 
-              keyTrends: [],
-              recommendedSkills: [],
-              nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
-          });
-        }
+      // if not then we create default values
+      if (!industryInsight) {
+        const insights = await generateAIInsights(data.industry);
 
-        // update the user
-        const updatedUser = await tx.user.update({
-          where: {
-            id: user.id,
-          },
+        industryInsight = await db.industryInsight.create({
           data: {
             industry: data.industry,
-            experience: data.experience,
-            bio: data.bio,
-            skills: data.skills,
+            ...insights,
+            nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           },
         });
-        return { updatedUser, industryInsight };
-      },
-      {
-        timeout: 5000, // ✅ increased timeout to prevent transaction expiration
       }
-    );
+
+      // update the user
+      const updatedUser = await tx.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          industry: data.industry,
+          experience: data.experience,
+          bio: data.bio,
+          skills: data.skills,
+        },
+      });
+      return { updatedUser, industryInsight };
+    });
     return { success: true, ...result };
   } catch (error) {
     console.error("Error updating user and industry: ", error.message);
