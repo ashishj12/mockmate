@@ -21,11 +21,11 @@ import { saveResume } from "@/actions/resume";
 import { EntryForm } from "./entry-form";
 import useFetch from "@/hooks/use-fetch";
 import { useUser } from "@clerk/nextjs";
-import html2pdf from "html2pdf.js";
+import jsPDF from "jspdf";
 import { resumeSchema } from "@/validations/schema";
 import { entriesToMarkdown } from "@/validations/helper";
 
-export default function ResumeBuilder({ initialContent }) {
+export default function ResumeBuilder({ initialContent = "" }) {
   const [activeTab, setActiveTab] = useState("edit");
   const [previewContent, setPreviewContent] = useState(initialContent);
   const { user } = useUser();
@@ -40,7 +40,12 @@ export default function ResumeBuilder({ initialContent }) {
   } = useForm({
     resolver: zodResolver(resumeSchema),
     defaultValues: {
-      contactInfo: {},
+      contactInfo: {
+        email: "",
+        mobile: "",
+        linkedin: "",
+        twitter: "",
+      },
       summary: "",
       skills: "",
       experience: [],
@@ -67,9 +72,9 @@ export default function ResumeBuilder({ initialContent }) {
   useEffect(() => {
     if (activeTab === "edit") {
       const newContent = getCombinedContent();
-      setPreviewContent(newContent ? newContent : initialContent);
+      setPreviewContent(newContent || initialContent);
     }
-  }, [formValues, activeTab]);
+  }, [formValues, activeTab, initialContent]);
 
   // Handle save result
   useEffect(() => {
@@ -83,6 +88,8 @@ export default function ResumeBuilder({ initialContent }) {
 
   const getContactMarkdown = () => {
     const { contactInfo } = formValues;
+    if (!contactInfo || !user?.fullName) return "";
+
     const parts = [];
     if (contactInfo.email) parts.push(`📧 ${contactInfo.email}`);
     if (contactInfo.mobile) parts.push(`📱 ${contactInfo.mobile}`);
@@ -91,23 +98,22 @@ export default function ResumeBuilder({ initialContent }) {
     if (contactInfo.twitter) parts.push(`🐦 [Twitter](${contactInfo.twitter})`);
 
     return parts.length > 0
-      ? `## <div align="center">${user.fullName}</div>
-        \n\n<div align="center">\n\n${parts.join(" | ")}\n\n</div>`
-      : "";
+      ? `## <div align="center">${user.fullName}</div>\n\n<div align="center">\n\n${parts.join(" | ")}\n\n</div>`
+      : `## <div align="center">${user.fullName}</div>`;
   };
 
   const getCombinedContent = () => {
     const { summary, skills, experience, education, projects } = formValues;
-    return [
+    const sections = [
       getContactMarkdown(),
       summary && `## Professional Summary\n\n${summary}`,
       skills && `## Skills\n\n${skills}`,
       entriesToMarkdown(experience, "Work Experience"),
       entriesToMarkdown(education, "Education"),
       entriesToMarkdown(projects, "Projects"),
-    ]
-      .filter(Boolean)
-      .join("\n\n");
+    ];
+
+    return sections.filter(Boolean).join("\n\n");
   };
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -115,18 +121,55 @@ export default function ResumeBuilder({ initialContent }) {
   const generatePDF = async () => {
     setIsGenerating(true);
     try {
-      const element = document.getElementById("resume-pdf");
-      const opt = {
-        margin: [15, 15],
-        filename: "resume.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      };
+      const pdf = new jsPDF();
+      
+      // Convert markdown to plain text for PDF
+      const content = previewContent
+        .replace(/#{1,6}\s/g, '') // Remove markdown headers
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic formatting
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links, keep text
+        .replace(/\n\n+/g, '\n\n') // Normalize line breaks
+        .trim();
 
-      await html2pdf().set(opt).from(element).save();
+      const lines = content.split('\n');
+      const lineHeight = 7;
+      const maxLineHeight = 280;
+      let currentY = 20;
+
+      pdf.setFontSize(12);
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        if (currentY > maxLineHeight) {
+          pdf.addPage();
+          currentY = 20;
+        }
+
+        if (line.trim() === '') {
+          currentY += lineHeight / 2;
+          continue;
+        }
+
+        // Split long lines
+        const splitLines = pdf.splitTextToSize(line, 180);
+        
+        for (let j = 0; j < splitLines.length; j++) {
+          if (currentY > maxLineHeight) {
+            pdf.addPage();
+            currentY = 20;
+          }
+          
+          pdf.text(splitLines[j], 15, currentY);
+          currentY += lineHeight;
+        }
+      }
+
+      pdf.save(`${user?.fullName || 'Resume'}.pdf`);
     } catch (error) {
       console.error("PDF generation error:", error);
+      toast.error("Failed to generate PDF. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -135,14 +178,21 @@ export default function ResumeBuilder({ initialContent }) {
   const onSubmit = async (data) => {
     try {
       const formattedContent = previewContent
-        .replace(/\n/g, "\n") // Normalize newlines
-        .replace(/\n\s*\n/g, "\n\n") // Normalize multiple newlines to double newlines
+        .replace(/\r\n/g, '\n') // Normalize Windows line endings
+        .replace(/\n\s*\n/g, '\n\n') // Normalize multiple newlines to double newlines
         .trim();
 
-      console.log(previewContent, formattedContent);
-      await saveResumeFn(previewContent);
+      await saveResumeFn(formattedContent);
     } catch (error) {
       console.error("Save error:", error);
+      toast.error("Failed to save resume. Please try again.");
+    }
+  };
+
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    if (value === "edit") {
+      setResumeMode("preview");
     }
   };
 
@@ -152,7 +202,7 @@ export default function ResumeBuilder({ initialContent }) {
         <h1 className="font-bold gradient-title text-5xl md:text-6xl">
           Resume Builder
         </h1>
-        <div className="space-x-2">
+        <div className="flex gap-2">
           <Button
             variant="destructive"
             onClick={handleSubmit(onSubmit)}
@@ -165,20 +215,23 @@ export default function ResumeBuilder({ initialContent }) {
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" />
+                <Save className="mr-2 h-4 w-4" />
                 Save
               </>
             )}
           </Button>
-          <Button onClick={generatePDF} disabled={isGenerating}>
+          <Button 
+            onClick={generatePDF} 
+            disabled={isGenerating || !previewContent.trim()}
+          >
             {isGenerating ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Generating PDF...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
               </>
             ) : (
               <>
-                <Download className="h-4 w-4" />
+                <Download className="mr-2 h-4 w-4" />
                 Download PDF
               </>
             )}
@@ -186,7 +239,7 @@ export default function ResumeBuilder({ initialContent }) {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="edit">Form</TabsTrigger>
           <TabsTrigger value="preview">Markdown</TabsTrigger>
@@ -204,7 +257,6 @@ export default function ResumeBuilder({ initialContent }) {
                     {...register("contactInfo.email")}
                     type="email"
                     placeholder="your@email.com"
-                    error={errors.contactInfo?.email}
                   />
                   {errors.contactInfo?.email && (
                     <p className="text-sm text-red-500">
@@ -265,9 +317,8 @@ export default function ResumeBuilder({ initialContent }) {
                 render={({ field }) => (
                   <Textarea
                     {...field}
-                    className="h-32"
+                    className="min-h-32"
                     placeholder="Write a compelling professional summary..."
-                    error={errors.summary}
                   />
                 )}
               />
@@ -285,9 +336,8 @@ export default function ResumeBuilder({ initialContent }) {
                 render={({ field }) => (
                   <Textarea
                     {...field}
-                    className="h-32"
+                    className="min-h-32"
                     placeholder="List your key skills..."
-                    error={errors.skills}
                   />
                 )}
               />
@@ -305,7 +355,7 @@ export default function ResumeBuilder({ initialContent }) {
                 render={({ field }) => (
                   <EntryForm
                     type="Experience"
-                    entries={field.value}
+                    entries={field.value || []}
                     onChange={field.onChange}
                   />
                 )}
@@ -326,7 +376,7 @@ export default function ResumeBuilder({ initialContent }) {
                 render={({ field }) => (
                   <EntryForm
                     type="Education"
-                    entries={field.value}
+                    entries={field.value || []}
                     onChange={field.onChange}
                   />
                 )}
@@ -347,7 +397,7 @@ export default function ResumeBuilder({ initialContent }) {
                 render={({ field }) => (
                   <EntryForm
                     type="Project"
-                    entries={field.value}
+                    entries={field.value || []}
                     onChange={field.onChange}
                   />
                 )}
@@ -364,53 +414,44 @@ export default function ResumeBuilder({ initialContent }) {
         <TabsContent value="preview">
           {activeTab === "preview" && (
             <Button
-              variant="link"
+              variant="outline"
               type="button"
-              className="mb-2"
+              className="mb-4"
               onClick={() =>
                 setResumeMode(resumeMode === "preview" ? "edit" : "preview")
               }
             >
               {resumeMode === "preview" ? (
                 <>
-                  <Edit className="h-4 w-4" />
-                  Edit Resume
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Markdown
                 </>
               ) : (
                 <>
-                  <Monitor className="h-4 w-4" />
+                  <Monitor className="mr-2 h-4 w-4" />
                   Show Preview
                 </>
               )}
             </Button>
           )}
 
-          {activeTab === "preview" && resumeMode !== "preview" && (
-            <div className="flex p-3 gap-2 items-center border-2 border-yellow-600 text-yellow-600 rounded mb-2">
+          {activeTab === "preview" && resumeMode === "edit" && (
+            <div className="flex p-3 gap-2 items-center border-2 border-yellow-600 text-yellow-600 rounded mb-4">
               <AlertTriangle className="h-5 w-5" />
               <span className="text-sm">
-                You will lose editied markdown if you update the form data.
+                You will lose edited markdown if you update the form data.
               </span>
             </div>
           )}
+
           <div className="border rounded-lg">
             <MDEditor
               value={previewContent}
               onChange={setPreviewContent}
-              height={800}
+              height={600}
               preview={resumeMode}
+              data-color-mode="light"
             />
-          </div>
-          <div className="hidden">
-            <div id="resume-pdf">
-              <MDEditor.Markdown
-                source={previewContent}
-                style={{
-                  background: "white",
-                  color: "black",
-                }}
-              />
-            </div>
           </div>
         </TabsContent>
       </Tabs>

@@ -45,7 +45,7 @@ export async function updateUser(data) {
         },
         data: {
           industry: data.industry,
-          experience: data.experience,
+          experience: user.experience ? parseInt(user.experience) : null,
           bio: data.bio,
           skills: data.skills,
         },
@@ -63,16 +63,8 @@ export async function getUserOnboardingStatus() {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({
-    where: {
-      clerkUserId: userId,
-    },
-  });
-
-  if (!user) throw new Error("user not found");
-
   try {
-    const userStatus = await db.user.findUnique({
+    const user = await db.user.findUnique({
       where: {
         clerkUserId: userId,
       },
@@ -81,7 +73,8 @@ export async function getUserOnboardingStatus() {
       },
     });
 
-    return { isOnboarded: !!userStatus?.industry };
+    if (!user) throw new Error("User not found");
+    return { isOnboarded: !!user.industry };
   } catch (error) {
     console.error("Error checking onboarding status: ", error.message);
     throw new Error("Failed to check onboarding status");

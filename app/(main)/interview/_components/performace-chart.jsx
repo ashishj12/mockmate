@@ -33,20 +33,28 @@ export default function PerformanceChart({ assessments }) {
   }, [assessments]);
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="gradient-title text-3xl md:text-4xl">
+        <CardTitle className="gradient-title text-2xl sm:text-3xl">
           Performance Trend
         </CardTitle>
         <CardDescription>Your quiz scores over time</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
+        <div className="h-[250px] sm:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis domain={[0, 100]} />
+              <XAxis 
+                dataKey="date" 
+                fontSize={12}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis 
+                domain={[0, 100]} 
+                fontSize={12}
+                tick={{ fontSize: 12 }}
+              />
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload?.length) {

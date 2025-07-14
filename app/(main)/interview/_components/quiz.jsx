@@ -85,13 +85,17 @@ export default function Quiz() {
   };
 
   if (generatingQuiz) {
-    return <BarLoader className="mt-4" width={"100%"} color="gray" />;
+    return (
+      <div className="w-full max-w-2xl mx-auto p-4">
+        <BarLoader className="mt-4" width={"100%"} color="gray" />
+      </div>
+    );
   }
 
   // Show results if quiz is completed
   if (resultData) {
     return (
-      <div className="mx-2">
+      <div className="w-full max-w-4xl mx-auto p-2">
         <QuizResult result={resultData} onStartNew={startNewQuiz} />
       </div>
     );
@@ -99,9 +103,9 @@ export default function Quiz() {
 
   if (!quizData) {
     return (
-      <Card className="mx-2">
+      <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Ready to test your knowledge?</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">Ready to test your knowledge?</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
@@ -121,40 +125,50 @@ export default function Quiz() {
   const question = quizData[currentQuestion];
 
   return (
-    <Card className="mx-2">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="text-lg sm:text-xl">
           Question {currentQuestion + 1} of {quizData.length}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-lg font-medium">{question.question}</p>
+        <p className="text-base sm:text-lg font-medium">{question.question}</p>
         <RadioGroup
           onValueChange={handleAnswer}
           value={answers[currentQuestion]}
-          className="space-y-2"
+          className="space-y-3"
         >
           {question.options.map((option, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <RadioGroupItem value={option} id={`option-${index}`} />
-              <Label htmlFor={`option-${index}`}>{option}</Label>
+            <div key={index} className="flex items-start space-x-2">
+              <RadioGroupItem 
+                value={option} 
+                id={`option-${index}`}
+                className="mt-1"
+              />
+              <Label 
+                htmlFor={`option-${index}`} 
+                className="text-sm sm:text-base leading-relaxed cursor-pointer"
+              >
+                {option}
+              </Label>
             </div>
           ))}
         </RadioGroup>
 
         {showExplanation && (
           <div className="mt-4 p-4 bg-muted rounded-lg">
-            <p className="font-medium">Explanation:</p>
-            <p className="text-muted-foreground">{question.explanation}</p>
+            <p className="font-medium mb-2">Explanation:</p>
+            <p className="text-muted-foreground text-sm sm:text-base">{question.explanation}</p>
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex flex-col sm:flex-row justify-between gap-4">
         {!showExplanation && (
           <Button
             onClick={() => setShowExplanation(true)}
             variant="outline"
             disabled={!answers[currentQuestion]}
+            className="w-full sm:w-auto"
           >
             Show Explanation
           </Button>
@@ -162,14 +176,13 @@ export default function Quiz() {
         <Button
           onClick={handleNext}
           disabled={!answers[currentQuestion] || savingResult}
-          className="ml-auto"
+          className="w-full sm:w-auto sm:ml-auto"
         >
-          {savingResult && (
-            <BarLoader className="mt-4" width={"100%"} color="gray" />
+          {savingResult ? (
+            <BarLoader width={"100%"} color="white" />
+          ) : (
+            currentQuestion < quizData.length - 1 ? "Next Question" : "Finish Quiz"
           )}
-          {currentQuestion < quizData.length - 1
-            ? "Next Question"
-            : "Finish Quiz"}
         </Button>
       </CardFooter>
     </Card>

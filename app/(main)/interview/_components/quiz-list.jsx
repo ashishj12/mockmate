@@ -24,19 +24,22 @@ export default function QuizList({ assessments }) {
   const [selectedQuiz, setSelectedQuiz] = useState(null);
 
   return (
-    <>
-      <Card>
+    <div className="pb-16"> {/* Padding to separate from footer */}
+      <Card className="w-full mb-12"> {/* Margin bottom to add spacing */}
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle className="gradient-title text-3xl md:text-4xl">
+              <CardTitle className="gradient-title text-2xl sm:text-3xl">
                 Recent Quizzes
               </CardTitle>
               <CardDescription>
                 Review your past quiz performance
               </CardDescription>
             </div>
-            <Button onClick={() => router.push("/interview/mock")}>
+            <Button 
+              onClick={() => router.push("/interview/mock")}
+              className="w-full sm:w-auto"
+            >
               Start New Quiz
             </Button>
           </div>
@@ -50,15 +53,15 @@ export default function QuizList({ assessments }) {
                 onClick={() => setSelectedQuiz(assessment)}
               >
                 <CardHeader>
-                  <CardTitle className="gradient-title text-2xl">
+                  <CardTitle className="gradient-title text-lg sm:text-xl">
                     Quiz {i + 1}
                   </CardTitle>
-                  <CardDescription className="flex justify-between w-full">
+                  <CardDescription className="flex flex-col sm:flex-row sm:justify-between gap-2">
                     <div>Score: {assessment.quizScore.toFixed(1)}%</div>
-                    <div>
+                    <div className="text-sm">
                       {format(
                         new Date(assessment.createdAt),
-                        "MMMM dd, yyyy HH:mm"
+                        "MMM dd, yyyy HH:mm"
                       )}
                     </div>
                   </CardDescription>
@@ -77,7 +80,7 @@ export default function QuizList({ assessments }) {
       </Card>
 
       <Dialog open={!!selectedQuiz} onOpenChange={() => setSelectedQuiz(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle></DialogTitle>
           </DialogHeader>
@@ -88,6 +91,6 @@ export default function QuizList({ assessments }) {
           />
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

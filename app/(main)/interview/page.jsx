@@ -7,9 +7,9 @@ export default async function InterviewPrepPage() {
   const assessments = await getAssessments();
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-6xl font-bold gradient-title">
+    <div className="w-full px-4 pt-8 sm:px-6 lg:px-12"> {/* Responsive padding */}
+      <div className="mb-5">
+        <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold gradient-title">
           Interview Preparation
         </h1>
       </div>

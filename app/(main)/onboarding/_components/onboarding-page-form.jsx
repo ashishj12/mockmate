@@ -59,6 +59,7 @@ const OnBoardingForm = ({ industries }) => {
       });
     } catch (error) {
       console.error("Onboarding error:", error);
+      toast.error("Failed to update profile. Please try again.");
     }
   };
 
@@ -67,6 +68,8 @@ const OnBoardingForm = ({ industries }) => {
       toast.success("Profile completed successfully");
       router.push("/dashboard");
       router.refresh();
+    } else if (updateResult?.success === false && !updateLoading) {
+      toast.error("Failed to update profile. Please try again.");
     }
   }, [updateResult, updateLoading]);
 
