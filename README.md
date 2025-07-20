@@ -43,7 +43,7 @@ MockMate is an AI-powered career coaching platform designed to help professional
         cd mockmate
     ```
 
-2. Create a `.env` file based on `.env.sample` with the following content:
+2. Create a `.env` file with the following content:
 
    ```
 
@@ -65,7 +65,7 @@ MockMate is an AI-powered career coaching platform designed to help professional
    ```shell
 
         # database setup
-        npx prisma migrate dev
+        npx prisma migrate dev --name init
         npx prisma generate
 
    ```
