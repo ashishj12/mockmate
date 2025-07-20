@@ -4,7 +4,7 @@
 
 # Overview
 
-MockMate is an AI-powered career coaching platform designed to helpprofessionals advance their careers through intelligent automation. Builtwith Next.js 14 and integrated with Google's Gemini AI, the applicationoffers a comprehensive suite of tools including an ATS-optimized resumebuilder, personalized cover letter generator, interactive interviewpreparation system, and real-time industry insights dashboard.
+MockMate is an AI-powered career coaching platform designed to help professionals advance their careers through intelligent automation. Built with Next.js 14 and integrated with Google's Gemini AI, the application offers a comprehensive suite of tools including an ATS-optimized resume builder, personalized cover letter generator, interactive interview preparation system, and real-time industry insights dashboard.
 
 ## Features
 
@@ -38,14 +38,15 @@ MockMate is an AI-powered career coaching platform designed to helpprofessionals
 
 1. Clone the repository
 
-```shell
-git clone https://github.com/ashishj12/mockmate.git
-cd mockmate
-```
+    ```shell
+        git clone https://github.com/ashishj12/mockmate.git
+        cd mockmate
+    ```
 
-2. - Create a `.env` file based on `.env.sample` with the following content:
+2. Create a `.env` file based on `.env.sample` with the following content:
 
    ```
+
        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
        CLERK_SECRET_KEY=
 
@@ -69,10 +70,6 @@ cd mockmate
 
    ```
 
-4. Install dependencies:
-
-   `npm install`
-
 5. For Inngest (Background Jobs)
 
    ```shell
@@ -80,33 +77,43 @@ cd mockmate
         npx inngest-cli@latest dev
    ```
 
-6. Run the development server:
+6. Install dependencies:
 
-   `npm run dev`
+   ```shell
+        npm install
+    ```
 
-7. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+7. Run the development server:
+
+   ```shell
+        npm run dev
+   ```
+
+8. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Deployment
 
 This application can be easily deployed to Vercel:
 
 ```shell
-npm run build
-npm run start
+    npm run build
+    npm run start
 ```
 
 Or connect your GitHub repository to Vercel for automatic deployments.
 
-## 🚀 Technologies Used
+## Technologies Used
 
 - **Next.js & Vite**: Fast, modern frameworks for frontend and full-stack development
 - **Tailwind CSS & Shadcn UI**: Utility-first styling and pre-built UI components
 - **Clerk**: Secure authentication and user management system
 - **Neon**: Scalable PostgreSQL database solution with serverless support
+- **Inngest**: Run Background Jobs
 - **Gemini AI**: Google’s LLM for generating smart, context-aware career guidance
 - **Vercel**: Deployment platform ensuring high performance and global scalability
 
-## 📚 Learn More
+## Learn More
 
 To learn more about the technologies used in this project:
 
@@ -118,13 +125,8 @@ To learn more about the technologies used in this project:
 - [Inngest Documentation](https://www.inngest.com/docs)
 - [Neon Documentation](https://neon.tech/docs)
 
-## 🤝 Connect with Me
+## Connect with Me
 
-<a href="https://github.com/ashishj12" target="_blank">
-  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
-</a>
-&nbsp;
-<a href="www.linkedin.com/in/ashish-kumar86j" target="_blank">
-  <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/>
-</a>
-&nbsp;
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ashishj12)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ashish-kumar86j)
+
