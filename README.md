@@ -92,6 +92,12 @@ MockMate is an AI-powered career coaching platform designed to help professional
 
 8. Open [http://localhost:3000](http://localhost:3000) in your browser
 
+## Docker Run
+
+   ```shell
+        docker compose up --build
+   ```
+
 ## Deployment
 
 This application can be easily deployed to Vercel:
@@ -129,4 +135,3 @@ To learn more about the technologies used in this project:
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ashishj12)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ashish-kumar86j)
-
