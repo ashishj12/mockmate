@@ -69,12 +69,12 @@ export default function ResumeBuilder({ initialContent = "" }) {
   }, [initialContent]);
 
   // Update preview content when form values change
-  useEffect(() => {
-    if (activeTab === "edit") {
-      const newContent = getCombinedContent();
-      setPreviewContent(newContent || initialContent);
-    }
-  }, [formValues, activeTab, initialContent]);
+useEffect(() => {
+  if (activeTab === "edit") {
+    const newContent = getCombinedContent();
+    setPreviewContent(newContent); 
+  }
+}, [formValues, activeTab]);
 
   // Handle save result
   useEffect(() => {
@@ -189,12 +189,14 @@ export default function ResumeBuilder({ initialContent = "" }) {
     }
   };
 
-  const handleTabChange = (value) => {
-    setActiveTab(value);
-    if (value === "edit") {
-      setResumeMode("preview");
-    }
-  };
+ const handleTabChange = (value) => {
+  setActiveTab(value);
+  if (value === "edit") {
+    setResumeMode("preview");
+  } else if (value === "preview" && !previewContent) {
+    setPreviewContent(""); // Ensure it starts empty
+  }
+};
 
   return (
     <div data-color-mode="light" className="space-y-4">
